@@ -11,7 +11,6 @@ include their username and password
 visible to teachers, so this isn't a security violation)
 '''
 
-import numpy as np
 import pandas as pd
 
 # Load data from Excel files. Make sure the filenames are correct!
@@ -19,8 +18,18 @@ login_data = pd.read_excel('./aleks_logins.xls')
 ikc_data = pd.read_excel('./ikc_report.xlsx')
 # Join on login_data['Name'] = ikc_data['Student Name']
 merged_inner = pd.merge(left=login_data, right=ikc_data, left_on='Name', right_on='Student Name')
+
+# debugging
+'''
+for index, row in merged_inner.iterrows():
+    student_name = row['Student Name']
+    time = row['Time in Knowledge Check']
+    print(f'{student_name}    "{time}"')
+'''
+
 # Select rows corresponding to students who haven't taken IKC
-no_ikc = merged_inner[merged_inner['Time in Knowledge Check'] == '-']
+no_time_symbols = ['-', 0]  # Two relevant symbols
+no_ikc = merged_inner[merged_inner['Time in Knowledge Check'].isin(no_time_symbols)]
 
 no_ikc_names = []  # Initialize a list to store names of students
 
