@@ -14,9 +14,10 @@ MESSAGE_TEMPLATE_FILE = 'message_template.txt'
 # Helper functions
 # missing list takes a pandas Series
 # and returns a string of the index values
-# where the record value is 0
+# where the record value is 0, 'M', or 'm'
 def missing_list(record):
-    return '\n'.join(list(record[record == 0].index))
+    missing_codes = ['M', 'm', 'Z', 'z', 0]
+    return '\n'.join(list(record[record.isin(missing_codes)].index))
 
 # This function takes a filename and two series (columns)
 # It returns a series with a message for each student
@@ -44,7 +45,7 @@ def message_column(template, name_series, missing_series):
         
         # Format it into a message
         message = pd.Series(("\n\n(Message for " + name_series + ')\n\n' +
-                          name_series + 
+                          name_series + ',\n\n' + 
                           starting_line + '\n\n' +
                           missing_series + '\n\n' +
                           closing_line + '\n\n\n')*(missing_series.str.len() > 0))
@@ -114,9 +115,9 @@ for sheet in sheets:
                       if re.match(lt_pattern, column)]
         period['missing'] = period[lt_columns].apply(missing_list, axis=1)
     except TypeError:
-        print("\tError: Could not process worksheet {sheet}")
+        print(f"\tError (TypeError): Could not process worksheet '{sheet}'")
         print("\tI expect column headers in Row 2 of the form 'LT1A', etc.")
-        print("\tSkipping worksheet {sheet}")
+        print(f"\tSkipping '{sheet}'")
         continue
     
     
