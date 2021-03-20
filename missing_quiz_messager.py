@@ -9,6 +9,8 @@ import pandas as pd
 import regex as re
 import os, sys
 
+MESSAGE_TEMPLATE_FILE = 'message_template.txt'
+
 # Helper functions
 # missing list takes a pandas Series
 # and returns a string of the index values
@@ -95,6 +97,8 @@ except PermissionError:
     print("An error occurred. Make sure Excel is closed and try again.")
     input("Press enter...")
     sys.exit(0)
+
+print(f"\nFile accepted. I will write messages based on the file '{MESSAGE_TEMPLATE_FILE}'\n")
     
 sheets = grades.keys() # Strings of worksheet names
 
@@ -117,15 +121,7 @@ for sheet in sheets:
     
     
     # Format it into a message
-#    period['message'] = ("\n\n(Message for " + period['Name'] + ')\n\n' +
-#            period['Name'] +
-#    "\nAccording to my records you have not yet taken the assessments " +
-#    "for the following LTs:\n\n" +
-#        period['missing'] +
-#        '''\n\nIs that correct? Would you like to take some of those next week?
-#        Best,
-#        Mr. Dirks\n\n\n''')*(period.missing.str.len() > 0)
-    period['message'] = message_column('message_template.txt',
+    period['message'] = message_column(MESSAGE_TEMPLATE_FILE,
                                       period.Name,
                                       period.missing)
 
