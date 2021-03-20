@@ -16,6 +16,38 @@ import os, sys
 def missing_list(record):
     return '\n'.join(list(record[record == 0].index))
 
+# This function takes a filename and two series (columns)
+# It returns a series with a message for each student
+# based on the text in the file
+def message_column(template, name_series, missing_series):
+    with open(template, 'r',) as file:
+        lines = file.readlines()
+        # Ignore all commented lines
+        # The first meaningful lines get stored as starting_line
+        # Once we hit another comment, we are done with starting_line
+        # and all subsequent non-comment lines are stored as closing_line
+        starting_line = ''
+        closing_line = ''
+        phase = 0  # 0 = opening comments, 1 = starting lines, 2 = closing lines
+        for line in lines:
+            if line.startswith('#'):
+                               if phase == 1: # If we're in starting lines
+                                   phase = 2 # Switch to ending lines
+                               continue
+            elif phase == 0: # If we're in opening comments
+                phase = 1 # switch to starting lnes
+                starting_line += '\n' + line
+            elif phase == 2:
+                closing_line += '\n' + line
+        
+        # Format it into a message
+        message = pd.Series(("\n\n(Message for " + name_series + ')\n\n' +
+                          name_series + 
+                          starting_line + '\n\n' +
+                          missing_series + '\n\n' +
+                          closing_line + '\n\n\n')*(missing_series.str.len() > 0))
+        return message
+    
 # Main code
 
 # Prompt user to choose gradebook file 
@@ -31,14 +63,17 @@ excel_files = excel_files_cd + excel_files_pd
 
 print("-=Missing Assessment Message Generator=-")
 print("")
-print("Choose the Excel file that contains your grades:")
+print("Choose the Excel file that contains your grades, or (Q)uit:")
 for index, file in enumerate(excel_files):
     print(f"\t({index + 1}) {file}")  # list files, 1-indexed
 choice = 0
 max = len(excel_files)
 while (choice <=0 or choice > max):
     try:
-        choice = int(input(">"))
+        choice = input(">")
+        if choice.strip().upper()[:1] == 'Q':
+            sys.exit(0)
+        choice = int(choice)
     except ValueError:
         choice = int(input(f"Please enter an integer between 1 and {max} > "))
 
@@ -59,7 +94,7 @@ try:
 except PermissionError:
     print("An error occurred. Make sure Excel is closed and try again.")
     input("Press enter...")
-    sys.exit()
+    sys.exit(0)
     
 sheets = grades.keys() # Strings of worksheet names
 
@@ -82,7 +117,6 @@ for sheet in sheets:
     
     
     # Format it into a message
-    #period['first_name'] = period['Name'].str.split(',')[1]
 #    period['message'] = ("\n\n(Message for " + period['Name'] + ')\n\n' +
 #            period['Name'] +
 #    "\nAccording to my records you have not yet taken the assessments " +
@@ -91,9 +125,10 @@ for sheet in sheets:
 #        '''\n\nIs that correct? Would you like to take some of those next week?
 #        Best,
 #        Mr. Dirks\n\n\n''')*(period.missing.str.len() > 0)
-    name = period['Name']
-    list_of_zeroes = period['missing']
-    message_str = r'''\n\n(Message for {period['Name']}
+    period['message'] = message_column('message_template.txt',
+                                      period.Name,
+                                      period.missing)
+
     
     # Create text file of messages
     filename = sheet + '_messages.txt'

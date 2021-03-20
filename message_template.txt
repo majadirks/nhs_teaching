@@ -1,0 +1,9 @@
+# Do not change the lines that start with #.
+# The message starts with the student name
+# Then we get this opening line:
+According to my records you have not yet taken the assessments for the following LTs:
+# LTs appear here
+# Then the following text appears:
+Is that correct? Would you like to take some of those next week?
+Best,
+Mr. Dirks
