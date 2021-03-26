@@ -10,14 +10,17 @@ import regex as re
 import os, sys
 
 MESSAGE_TEMPLATE_FILE = 'message_template.txt'
+MISSING_CODES = ['M', 'm', 'Z', 'z', 0]
 
 # Helper functions
 # missing list takes a pandas Series
 # and returns a string of the index values
 # where the record value is 0, 'M', or 'm'
-def missing_list(record):
-    missing_codes = ['M', 'm', 'Z', 'z', 0]
-    return '\n'.join(list(record[record.isin(missing_codes)].index))
+def missing_list(record):   
+    return '\n'.join(list(record[record.isin(MISSING_CODES)].index))
+
+def missing_count(record):
+    return record[record.isin(MISSING_CODES)].count()
 
 # This function takes a filename and two series (columns)
 # It returns a series with a message for each student
@@ -119,6 +122,8 @@ for sheet in sheets:
         print("\tI expect column headers in Row 2 of the form 'LT1A', etc.")
         print(f"\tSkipping '{sheet}'")
         continue
+    period['missing_count'] = period[lt_columns].apply(missing_count, axis=1)
+    print(period.sort_values('missing_count', ascending = False))
     
     
     # Format it into a message
@@ -129,7 +134,13 @@ for sheet in sheets:
     
     # Create text file of messages
     filename = sheet + '_messages.txt'
-    period['message'].to_csv(filename, header = False, index = False)  # Overwrites all but last period!
+    period['message'].to_csv(filename, header = False, index = False)
     print(f"\tWrote '{filename}'")
-
+    
+    # Create text report of missing
+    filename = sheet + '_missing_quiz_counts.txt'
+    period[['Name', 'missing_count']]\
+                                    .sort_values('missing_count', ascending = False)\
+                                    .to_csv(filename, sep = '\t', index = False)
+    print(f"\tWrote '{filename}'")
 input("\nPress Enter to exit...")
