@@ -4,6 +4,7 @@
 According to my records you have not yet taken the assessments for the following LTs:
 # LTs appear here
 # Then the following text appears:
-Is that correct? Would you like to take some of those next week?
+Is that correct? Would you like to take some of those this week or next?
+I'd also be happy to meet with you during asynch if you'd like to review other material from this semester.
 Best,
 Mr. Dirks
