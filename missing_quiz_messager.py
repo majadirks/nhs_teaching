@@ -123,7 +123,6 @@ for sheet in sheets:
         print(f"\tSkipping '{sheet}'")
         continue
     period['missing_count'] = period[lt_columns].apply(missing_count, axis=1)
-    print(period.sort_values('missing_count', ascending = False))
     
     
     # Format it into a message
